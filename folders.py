@@ -1,6 +1,5 @@
 import os
-import json
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Any
 from datetime import datetime
 from dotenv import load_dotenv
 from google.cloud import storage
@@ -112,47 +111,7 @@ def search_for_file(query: str, dbx, local_path: str, bucket_name: str, index_lo
 
     pass
 
-def translate_query(query: str, index_location: str) -> Tuple[List[str], List[str], List[str]]:
-    include, exclude, optional = parse_query(query)
-
-    index = None
-    with open(index_location, "r") as file:
-        index = json.load(file)
-    if not index:
-        print("error loading index")
-        return
-
-    # I don't think we actually need this bit
-    temp = set(exclude)
-    for e in exclude:
-        res = index.get(e)
-        if not res:
-            res = set()
-            for i in index:
-                entry = index.get(i)
-                if e in entry:
-                    res.update([i] + entry)
-        temp.update(res)
-    exclude = list(temp)
-
-    temp = set(optional)
-    for e in include + optional:
-        res = index.get(e)
-        if not res:
-            res = set()
-            for i in index:
-                entry = index.get(i)
-                if e in entry:
-                    res.update([i] + entry)
-        temp.update(res)
-    optional = list(temp)
-
-    include = [i for i in include if i not in optional]
-    return include, exclude, optional
-
 # load_dotenv()
-index_location = "./search_terms.json"
-print(translate_query('-Kind +mulher man +"the cat"', index_location))
 
 # files = get_filenames_from(os.getenv("ARCHIVE_DIR"))
 # dbx = get_dropbox(os.getenv("APP_KEY"), os.getenv("REFRESH_TOKEN"))
@@ -160,4 +119,3 @@ print(translate_query('-Kind +mulher man +"the cat"', index_location))
 # upload_to_gcloud_archive('./files/archive/glacier', buckets["ANNUAL"])
 # upload_to_dropbox(dbx, files, os.path.join("Shared", "Folder C"))
 # search_for_file("2", dbx, "./files", buckets["ANNUAL"])
-
